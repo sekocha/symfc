@@ -272,6 +272,8 @@ def prepare_normal_equation_O2O3(
                 print("Solver_block:", end, "/", disps.shape[0], flush=True)
             t1 = time.time()
             X = np.zeros((n_atom_batch * 3 * (end - begin), n_compr))
+            if verbose:
+                print("Calculating disps @ compress_mat", flush=True)
             X[:, :n_compr_fc2] = dot_product_sparse(
                 disps[begin:end],
                 compr_mat_fc2,
@@ -286,6 +288,8 @@ def prepare_normal_equation_O2O3(
             ).reshape((-1, n_compr_fc3))
             y = forces[begin:end, begin_i * 3 : end_i * 3].reshape(-1)
 
+            if verbose:
+                print("Calculating X.T @ X", flush=True)
             matx = calc_sum_xtx(matx, X, verbose=verbose)
             maty += X.T @ y
             t2 = time.time()

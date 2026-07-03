@@ -178,6 +178,8 @@ def prepare_normal_equation_O2(
             if verbose:
                 print("Solver_block:", end, "/", disps.shape[0], flush=True)
             t1 = time.time()
+            if verbose:
+                print("Calculating disps @ compress_mat", flush=True)
             X2 = dot_product_sparse(
                 disps[begin:end],
                 compr_mat_fc2,
@@ -185,7 +187,15 @@ def prepare_normal_equation_O2(
                 dense=not use_sparse_disps,
             ).reshape((-1, n_compr_fc2))
             y = forces[begin:end, begin_i * 3 : end_i * 3].reshape(-1)
-            mat22 += X2.T @ X2
+            if verbose:
+                print("Calculating X.T @ X", flush=True)
+            #mat22 += X2.T @ X2
+            mat_tmp = X2.T @ X2
+            if verbose:
+                print("Calculating sum(X.T @ X)", flush=True)
+            mat22 += mat_tmp
+            if verbose:
+                print("Calculating X.T @ y", flush=True)
             mat2y += X2.T @ y
             t2 = time.time()
             if verbose:

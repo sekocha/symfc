@@ -26,12 +26,12 @@ def calc_sum_xtx(
         return xtx
 
     try:
-        n_batch = min(int(mem_size / nbytes_threshold), 10) + 2
+        n_batch = min(int(mem_size / nbytes_threshold), 100) + 2
     except ZeroDivisionError:
         n_batch = 3
 
     size = x.shape[1]
-    batch_size = size // n_batch
+    batch_size = max(size // n_batch, 5000)
     begin_ids, end_ids = get_batch_slice(size, batch_size)
     for i, (begin_row, end_row) in enumerate(zip(begin_ids, end_ids, strict=True)):
         if verbose:

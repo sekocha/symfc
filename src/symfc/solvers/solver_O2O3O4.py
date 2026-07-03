@@ -313,6 +313,8 @@ def prepare_normal_equation_O2O3O4(
                 print("Solver_block:", end, "/", disps.shape[0], flush=True)
             t1 = time.time()
             X = np.zeros((n_atom_batch * 3 * (end - begin), n_compr))
+            if verbose:
+                print("disp @ compress_mat", flush=True)
             X[:, :n_compr_fc2] = dot_product_sparse(
                 disps[begin:end],
                 compr_mat_fc2,
@@ -334,7 +336,11 @@ def prepare_normal_equation_O2O3O4(
             ).reshape((-1, n_compr_fc4))
             y = forces[begin:end, begin_i * 3 : end_i * 3].reshape(-1)
 
+            if verbose:
+                print("X.T @ X", flush=True)
             matx = calc_sum_xtx(matx, X, verbose=verbose)
+            #matx += X.T @ X
+            #np.add(matx, X.T @ X, out=matx)
             maty += X.T @ y
             t2 = time.time()
             if verbose:
@@ -348,13 +354,20 @@ def prepare_normal_equation_O2O3O4(
 
     if verbose:
         print("Solver:", "Calculate X.T @ X and X.T @ y", flush=True)
+        print("Solver:", "compress_eigvecs.T @ matx @ compress_eigvecs", flush=True)
     XTX = block_matrix_sandwich_sym(compress_eigvecs, matx)
+    if verbose:
+        print("Solver:", "compress_eigvecs @ maty", flush=True)
     XTy = compress_eigvecs.T @ maty
 
+    if verbose:
+        print("Solver:", "Reset indices", flush=True)
     fc2_basis.blocked_basis_set.reset_indices()
     fc3_basis.blocked_basis_set.reset_indices()
     fc4_basis.blocked_basis_set.reset_indices()
 
+    if verbose:
+        print("Solver:", "Reset coeffs", flush=True)
     compact_compress_mat_fc2 /= const_fc2
     compact_compress_mat_fc3 /= const_fc3
     compact_compress_mat_fc4 /= const_fc4
